@@ -1,0 +1,25 @@
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "$lib": ["src/lib"],
+      "$lib/*": ["src/lib/*"],
+      "$types": ["src/types"],
+      "$types/*": ["src/types/*"],
+      "bcryptjs": ["node_modules/@types/bcryptjs"]
+    },
+    "outDir": "dist",
+    "typeRoots": ["node_modules/@types", "src/types"]
+  },
+  "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte"],
+  "exclude": ["node_modules", "*.config.js", "postcss.config.js", "tailwind.config.js"]
+}

@@ -1,0 +1,20 @@
+{
+	"/": [],
+	"/api/auth/login": [
+		"src/routes/api/auth/login/+server.ts"
+	],
+	"/api/auth/magic-link": [
+		"src/routes/api/auth/magic-link/+server.ts"
+	],
+	"/api/auth/register": [
+		"src/routes/api/auth/register/+server.ts"
+	],
+	"/api/auth/verify": [
+		"src/routes/api/auth/verify/+server.ts"
+	],
+	"/my": [],
+	"/my/auth/login": [],
+	"/my/auth/register": [],
+	"/my/auth/verification": [],
+	"/my/dashboard": []
+}

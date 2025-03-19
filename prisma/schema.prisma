@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User roles enum
+enum UserRole {
+  HQ_ADMIN
+  AGENT
+  RESELLER
+  STOCKIST
+  CUSTOMER
+}
+
+// User status enum
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+// Product status enum
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+// Sale status enum
+enum SaleStatus {
+  COMPLETED
+  PENDING
+  CANCELLED
+}
+
+// Payment status enum
+enum PaymentStatus {
+  PAID
+  PENDING
+  FAILED
+}
+
+// Commission status enum
+enum CommissionStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+// Commission type enum
+enum CommissionType {
+  DIRECT
+  LEVEL
+  BINARY
+  MATRIX
+  BREAKAWAY
+}
+
+// Region status enum
+enum RegionStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// User model
+model User {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  email         String      @unique
+  passwordHash  String?     @map("password_hash")
+  fullName      String      @map("full_name")
+  phone         String?
+  region        String
+  role          UserRole    @default(CUSTOMER)
+  sponsorId     String?     @map("sponsor_id")
+  agentCode     String?     @map("agent_code")
+  status        UserStatus  @default(PENDING)
+  avatarUrl     String?     @map("avatar_url")
+  kycVerified   Boolean     @default(false) @map("kyc_verified")
+  referralCode  String      @unique @map("referral_code")
+
+  // Relations
+  sponsor       User?       @relation("UserDownline", fields: [sponsorId], references: [id])
+  downlines     User[]      @relation("UserDownline")
+  sales         Sale[]
+  commissions   Commission[]
+
+  @@map("users")
+}
+
+// Product model
+model Product {
+  id            String        @id @default(uuid())
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  name          String
+  description   String
+  price         Decimal       @db.Decimal(10, 2)
+  stockQuantity Int           @map("stock_quantity")
+  imageUrl      String?       @map("image_url")
+  category      String
+  status        ProductStatus @default(ACTIVE)
+  region        String
+  
+  // Relations
+  sales         Sale[]
+
+  @@map("products")
+}
+
+// Sale model
+model Sale {
+  id              String        @id @default(uuid())
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  userId          String        @map("user_id")
+  productId       String        @map("product_id")
+  quantity        Int
+  amount          Decimal       @db.Decimal(10, 2)
+  customerName    String?       @map("customer_name")
+  customerEmail   String?       @map("customer_email")
+  customerPhone   String?       @map("customer_phone")
+  status          SaleStatus    @default(PENDING)
+  paymentMethod   String        @map("payment_method")
+  paymentStatus   PaymentStatus @default(PENDING)
+  region          String
+  
+  // Relations
+  user            User          @relation(fields: [userId], references: [id])
+  product         Product       @relation(fields: [productId], references: [id])
+  commissions     Commission[]
+
+  @@map("sales")
+}
+
+// Commission model
+model Commission {
+  id            String           @id @default(uuid())
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  userId        String           @map("user_id")
+  saleId        String           @map("sale_id")
+  amount        Decimal          @db.Decimal(10, 2)
+  type          CommissionType
+  status        CommissionStatus @default(PENDING)
+  paidAt        DateTime?        @map("paid_at")
+  region        String
+  
+  // Relations
+  user          User             @relation(fields: [userId], references: [id])
+  sale          Sale             @relation(fields: [saleId], references: [id])
+
+  @@map("commissions")
+}
+
+// Region model
+model Region {
+  id            String        @id @default(uuid())
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  name          String
+  code          String        @unique
+  currency      String
+  taxRate       Decimal       @map("tax_rate") @db.Decimal(5, 2)
+  status        RegionStatus  @default(ACTIVE)
+  
+  // Relations
+  commissionStructures CommissionStructure[]
+
+  @@map("regions")
+}
+
+// Commission Structure model
+model CommissionStructure {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  regionId      String      @map("region_id")
+  level         Int
+  percentage    Decimal     @db.Decimal(5, 2)
+  type          CommissionType
+  status        String      @default("active")
+  
+  // Relations
+  region        Region      @relation(fields: [regionId], references: [id])
+
+  @@map("commission_structures")
+}

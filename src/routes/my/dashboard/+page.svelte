@@ -1,0 +1,358 @@
+<script>
+  import { onMount } from 'svelte';
+  
+  // Mock data for dashboard
+  let user = {
+    name: 'Ahmad Razali',
+    role: 'Level 1 Agent',
+    region: 'Malaysia',
+    joinDate: '2024-12-01',
+    profileImage: '/images/profile-placeholder.jpg'
+  };
+  
+  let stats = {
+    personalSales: 2500,
+    groupSales: 12500,
+    activeDownlines: 8,
+    pendingCommissions: 750
+  };
+  
+  let recentActivities = [
+    { type: 'sale', amount: 250, customer: 'Siti Aminah', date: '2025-03-15', status: 'completed' },
+    { type: 'commission', amount: 75, source: 'Group Sales', date: '2025-03-14', status: 'pending' },
+    { type: 'recruitment', name: 'Kamal Ibrahim', level: 'Level 2', date: '2025-03-10', status: 'active' },
+    { type: 'sale', amount: 180, customer: 'Tan Wei Ling', date: '2025-03-08', status: 'completed' },
+    { type: 'commission', amount: 45, source: 'Direct Sales', date: '2025-03-05', status: 'completed' }
+  ];
+  
+  let downlinePerformance = [
+    { name: 'Kamal Ibrahim', sales: 1200, recruits: 3, performance: 85 },
+    { name: 'Nurul Huda', sales: 950, recruits: 2, performance: 78 },
+    { name: 'Lee Chong Wei', sales: 1500, recruits: 4, performance: 92 },
+    { name: 'Aisha Tan', sales: 800, recruits: 1, performance: 65 },
+    { name: 'Rajesh Kumar', sales: 1100, recruits: 2, performance: 80 }
+  ];
+  
+  let loading = true;
+  
+  onMount(() => {
+    // Simulate loading data
+    setTimeout(() => {
+      loading = false;
+    }, 800);
+    
+    // In a real app, we would fetch data from Supabase
+    // const fetchDashboardData = async () => {
+    //   const { data: userData, error: userError } = await supabase
+    //     .from('users')
+    //     .select('*')
+    //     .eq('id', user.id)
+    //     .single();
+    //
+    //   if (userError) console.error('Error fetching user data:', userError);
+    //   else user = userData;
+    //
+    //   // Similar fetches for other data...
+    // };
+    //
+    // fetchDashboardData();
+  });
+  
+  // Format currency
+  const formatCurrency = (value = 0.00) => {
+    return new Intl.NumberFormat('en-MY', {
+      style: 'currency',
+      currency: 'MYR'
+    }).format(value);
+  };
+  
+  // Calculate performance color
+  const getPerformanceColor = (value = 0) => {
+    if (value >= 90) return 'bg-green-500';
+    if (value >= 70) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+</script>
+
+<div class="min-h-screen bg-gray-100">
+  <!-- Top Navigation -->
+  <nav class="bg-primary-700 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <h1 class="text-xl font-bold">
+              <img src="/images/fefet-logo-white-ii.png" alt="Fefet" class="w-8 h-8" />
+            </h1>
+            <span class="ml-2 bg-primary-500 text-white text-xs px-2 py-1 rounded-full">Malaysia</span>
+          </div>
+        </div>
+        <div class="flex items-center">
+          <button class="p-1 rounded-full text-white hover:bg-primary-600 focus:outline-none" aria-label="Notifications">
+            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
+          <div class="ml-3 relative">
+            <div class="flex items-center">
+              <button class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary-800 focus:ring-white">
+                <span class="sr-only">Open user menu</span>
+                <div class="h-8 w-8 rounded-full bg-primary-500 flex items-center justify-center">
+                  <span class="text-white font-medium">{user.name.charAt(0)}</span>
+                </div>
+              </button>
+              <span class="ml-2">{user.name}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="flex">
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white shadow-md h-screen sticky top-0 pt-6">
+      <div class="px-4 pb-6 border-b">
+        <div class="flex items-center">
+          <div class="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 text-xl font-bold">
+            {user.name.charAt(0)}
+          </div>
+          <div class="ml-3">
+            <p class="font-medium text-gray-900">{user.name}</p>
+            <p class="text-xs text-gray-500">{user.role}</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="mt-6">
+        <div class="px-4 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Main
+        </div>
+        <a href="/my/dashboard" class="flex items-center px-4 py-3 text-sm bg-primary-50 text-primary-700 border-l-4 border-primary-700">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="/my/dashboard/sales" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          Sales
+        </a>
+        <a href="/my/dashboard/team" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          My Team
+        </a>
+        <a href="/my/dashboard/commissions" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Commissions
+        </a>
+        <a href="/my/dashboard/products" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          Products
+        </a>
+        
+        <div class="px-4 mt-6 mb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Account
+        </div>
+        <a href="/my/dashboard/profile" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Profile
+        </a>
+        <a href="/my/dashboard/settings" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Settings
+        </a>
+        <a href="/my/auth/login" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+      {#if loading}
+        <div class="flex justify-center items-center h-64">
+          <svg class="animate-spin h-10 w-10 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      {:else}
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p class="text-gray-600">Welcome back, {user.name}. Here's your overview for today.</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-primary-100 text-primary-800">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Personal Sales</p>
+                <p class="text-lg font-semibold text-gray-900">{formatCurrency(stats.personalSales)}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-green-100 text-green-800">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Group Sales</p>
+                <p class="text-lg font-semibold text-gray-900">{formatCurrency(stats.groupSales)}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-blue-100 text-blue-800">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Active Downlines</p>
+                <p class="text-lg font-semibold text-gray-900">{stats.activeDownlines}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-yellow-100 text-yellow-800">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Pending Commissions</p>
+                <p class="text-lg font-semibold text-gray-900">{formatCurrency(stats.pendingCommissions)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Recent Activities -->
+          <div class="bg-white rounded-lg shadow-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900">Recent Activities</h2>
+            </div>
+            <div class="p-6">
+              <ul class="divide-y divide-gray-200">
+                {#each recentActivities as activity}
+                  <li class="py-3 flex items-center">
+                    <div class={`p-2 rounded-full ${
+                      activity.type === 'sale' ? 'bg-green-100 text-green-800' :
+                      activity.type === 'commission' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {#if activity.type === 'sale'}
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        {:else if activity.type === 'commission'}
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        {:else}
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        {/if}
+                      </svg>
+                    </div>
+                    <div class="ml-4 flex-1">
+                      <p class="text-sm font-medium text-gray-900">
+                        {#if activity.type === 'sale'}
+                          Sale to {activity.customer} for {formatCurrency(activity.amount)}
+                        {:else if activity.type === 'commission'}
+                          Commission from {activity.source} of {formatCurrency(activity.amount)}
+                        {:else}
+                          New recruit: {activity.name} ({activity.level})
+                        {/if}
+                      </p>
+                      <p class="text-xs text-gray-500">{activity.date}</p>
+                    </div>
+                    <div>
+                      <span class={`px-2 py-1 text-xs rounded-full ${
+                        activity.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {activity.status}
+                      </span>
+                    </div>
+                  </li>
+                {/each}
+              </ul>
+              <div class="mt-4 text-center">
+                <a href="/my/dashboard/activities" class="text-sm font-medium text-primary-600 hover:text-primary-500">
+                  View all activities
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Downline Performance -->
+          <div class="bg-white rounded-lg shadow-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900">Downline Performance</h2>
+            </div>
+            <div class="p-6">
+              <ul class="divide-y divide-gray-200">
+                {#each downlinePerformance as downline}
+                  <li class="py-3">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-medium">
+                          {downline.name.charAt(0)}
+                        </div>
+                        <div class="ml-3">
+                          <p class="text-sm font-medium text-gray-900">{downline.name}</p>
+                          <p class="text-xs text-gray-500">Sales: {formatCurrency(downline.sales)} | Recruits: {downline.recruits}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                          <div class={`${getPerformanceColor(downline.performance)} h-2 rounded-full`} style={`width: ${downline.performance}%`}></div>
+                        </div>
+                        <span class="text-sm text-gray-700">{downline.performance}%</span>
+                      </div>
+                    </div>
+                  </li>
+                {/each}
+              </ul>
+              <div class="mt-4 text-center">
+                <a href="/my/dashboard/team" class="text-sm font-medium text-primary-600 hover:text-primary-500">
+                  View all team members
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
+    </main>
+  </div>
+</div>
